@@ -4,6 +4,7 @@ package minimizacao;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.util.ArrayList;
 
 /*
@@ -22,7 +23,7 @@ public class Automato {
     private ArrayList<String> estadosFinais;
     private ArrayList<String> alfabeto;
     private ArrayList<String> transicoes;
-    private ioArquivo io;
+    private ArrayList<Coluna> matriz;
     
     public Automato(String nomeArquivo) {
         estados = new ArrayList<>();
@@ -30,10 +31,13 @@ public class Automato {
         estadosFinais = new ArrayList<>();
         alfabeto = new ArrayList<>();
         transicoes = new ArrayList<>();
+        matriz = new ArrayList<Coluna>();
+        
         try{
             System.out.println("\n\n abla \t\t top\n\n");
             
-            BufferedReader automato = new BufferedReader(new FileReader(nomeArquivo + ".txt"));
+            ioArquivo io = new ioArquivo();
+            BufferedReader automato = io.lerArquivo(nomeArquivo);
             String linha = automato.readLine();
             System.out.println(linha);
             
@@ -134,6 +138,41 @@ public class Automato {
         System.out.print("Estados Finais-> " );
         for(String aux : estadosFinais){
            System.out.println(aux);
+        }
+    }
+    
+    public void formatarTabela() {
+        
+        // cria a matriz para calcular o AFD minimizado.
+        Indice indiceAux;
+        boolean igualAux;
+        ArrayList<Indice> propagacaoAux = new ArrayList<Indice>();
+        ArrayList<String> motivoAux = new ArrayList<String>();
+
+
+        // insere todas as linha da matriz - combinações [i, j].
+        for (int i = 0; i < estados.size(); i++) {
+                for (int j = i + 1; j < estados.size(); j++) {
+                        indiceAux = new Indice (i,j);
+                        igualAux = true;
+                        propagacaoAux = null;
+                        motivoAux = null;
+                        Coluna coluna = new Coluna(indiceAux,igualAux,propagacaoAux,motivoAux);
+                        matriz.add(coluna);
+                }
+        }
+        
+        try{
+            FileWriter arq = new FileWriter("resultado.txt");
+            arq.write("INDICE\tD[i,j] = \t S[i,j] = \t MOTIVO \n");
+            
+            for(Coluna coluna :matriz){
+                arq.write(coluna.getIndice().toString() + "\t" + coluna.igual + "\t" + "\n");
+            }
+            arq.close();
+        }
+        catch(Exception e){
+            
         }
     }
 }

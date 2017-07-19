@@ -19,6 +19,9 @@ import java.io.IOException;
  */
 public class ioArquivo {
 
+    public ioArquivo() {
+        
+    }
     public BufferedReader lerArquivo(String nomeArquivo) throws FileNotFoundException{
         BufferedReader automato = new BufferedReader(new FileReader(nomeArquivo + ".txt"));
     return automato;
