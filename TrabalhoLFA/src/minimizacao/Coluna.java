@@ -43,5 +43,9 @@ public class Coluna {
     public void setMotivo(String motivo){
         this.motivo = motivo;
     }
+    
+    public void setIgual(){
+        this.igual = false;
+    }
 }
 

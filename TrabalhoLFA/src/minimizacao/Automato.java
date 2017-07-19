@@ -232,14 +232,20 @@ public class Automato {
                 }
             }
             
-            init.setFinal();
+            // raydson deve consertar a leittura dos estados para que a funcao abaixo funcione
+            
+            System.out.println(init.getIsFinal()+ ","+dest.getIsFinal());
             
             if(init.getIsFinal() == false && dest.getIsFinal() == true){ // nao e possivel simplicar
                 coluna.setMotivo("Nao final / final");
+                coluna.setIgual();
+                //aqui deve ser inserida a questao da propagação
             }
             else{
                 if(init.getIsFinal() == true && dest.getIsFinal() == false){ // nao é possivel simplificar
                     coluna.setMotivo("Final/ Nao final");
+                    coluna.setIgual();
+                    //aqui deve ser inserida a qestao da propagação
                 }
                 else{
                     //william inserir sua matriz aqui;
