@@ -29,7 +29,7 @@ public class Automato {
     private Indice indiceAux;
     private boolean igualAux;
     private ArrayList<Indice> propagacaoAux;
-    private ArrayList<String> motivoAux;
+    private String motivoAux;
     
     public Automato(String nomeArquivo) {
         estados = new ArrayList<>();
@@ -118,12 +118,21 @@ public class Automato {
                 linha = linha.replace("}", "");
                 String[] iniciais = linha.split(",");
                 for(int i=0; i<iniciais.length; i++){
-                    estadosIniciais.add(iniciais[i]);
+                    for(int j=0; j<estados.size(); j++){
+                        if(iniciais[i].equals(estados.get(j).getEstado())){
+                            estados.get(j).setInicial();
+                        }
+                    }
+                    //estadosFinais.add(finais[i]);
                 }
             }
             else{
-                estadosIniciais.add(linha);
-            }            
+                for(int j=0; j<estados.size(); j++){
+                        if(linha.equals(estados.get(j).getEstado())){
+                            estados.get(j).setInicial();
+                        }
+                    }
+            }      
             
             linha = automato.readLine();
             if(linha.charAt(0) == '{'){
@@ -131,12 +140,23 @@ public class Automato {
                 linha = linha.replace("}", "");
                 String[] finais = linha.split(",");
                 for(int i=0; i<finais.length; i++){
-                    estadosFinais.add(finais[i]);
+                    for(int j=0; j<estados.size(); j++){
+                        if(finais[i].equals(estados.get(j).getEstado())){
+                            estados.get(j).setFinal();
+                        }
+                    }
+                    //estadosFinais.add(finais[i]);
                 }
             }
             else{
-                estadosFinais.add(linha);
+                for(int j=0; j<estados.size(); j++){
+                        if(linha.equals(estados.get(j).getEstado())){
+                            estados.get(j).setFinal();
+                        }
+                    }
             }
+            
+            
         }
         catch(Exception e){
             System.out.println("Erro ao ler o arquivo :: " + e);
@@ -146,7 +166,7 @@ public class Automato {
     public void imprimePraMim(){
         System.out.print("Estados -> " );
         for(Estado aux : estados){
-           System.out.println(aux);
+           System.out.println(aux.getEstado());
         }
         
         System.out.print("Afabeto -> " );
@@ -181,10 +201,55 @@ public class Automato {
                         indiceAux = new Indice (i,j);
                         igualAux = true;
                         propagacaoAux = new ArrayList<Indice>();
-                        motivoAux = new ArrayList<String>();
+                        motivoAux = "nao tem motivo";
                         Coluna coluna = new Coluna(indiceAux,igualAux,propagacaoAux,motivoAux);
                         matriz.add(coluna);
                 }
+        }
+       
+    }
+    
+    public void minimizar(){ // resolve o problema de fato
+        for(Coluna coluna : matriz){
+            String indice = coluna.indice.toString();
+            indice = indice.replace("[", "");
+            indice = indice.replace("]", "");
+            String[] aux = indice.split(","); // cada indice do vetor fica com um dos estados envolvidos
+            
+            aux[0] = "q" + aux[0];
+            aux[1] = "q" + aux[1];
+            
+            
+            Estado init = new Estado();
+            Estado dest = new Estado();
+            
+            for(Estado estado : estados){
+                if(estado.getEstado().equals(aux[0])){
+                    init = estado;
+                }
+                if(estado.getEstado().equals(aux[1])){
+                    dest = estado;
+                }
+            }
+            
+            init.setFinal();
+            
+            if(init.getIsFinal() == false && dest.getIsFinal() == true){ // nao e possivel simplicar
+                coluna.setMotivo("Nao final / final");
+            }
+            else{
+                if(init.getIsFinal() == true && dest.getIsFinal() == false){ // nao é possivel simplificar
+                    coluna.setMotivo("Final/ Nao final");
+                }
+                else{
+                    //william inserir sua matriz aqui;
+                    
+                }
+            }
+            
+           
+           
+            
         }
         
         try{
@@ -192,16 +257,13 @@ public class Automato {
             arq.write("INDICE\t\tD[i,j] = \t\t S[i,j] = \t\t MOTIVO \n");
             
             for(Coluna coluna :matriz){
-                arq.write(coluna.getIndice().toString() + "\t\t" + coluna.igual + "\t\t" + "\n");
+                arq.write(coluna.getIndice().toString() + "\t\t" + coluna.getIgual() + "\t\t\t" + "\t\t\t" + coluna.getMotivo() + "\n");
             }
             arq.close();
         }
         catch(Exception e){
             
         }
-    }
-    
-    public void minimizar(){
         
     }
 }

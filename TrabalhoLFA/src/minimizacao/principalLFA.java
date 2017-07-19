@@ -16,5 +16,6 @@ public class principalLFA {
         System.out.println("vai imprimir");
         automato.imprimePraMim();
         automato.formatarTabela();
+        automato.minimizar();
     }
 }

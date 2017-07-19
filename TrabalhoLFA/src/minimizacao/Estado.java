@@ -35,6 +35,10 @@ public class Estado {
     public String getEstado(){
         return estado;
     }
+    
+    public boolean getIsFinal(){
+        return isFinal;
+    }
 }
 
 
