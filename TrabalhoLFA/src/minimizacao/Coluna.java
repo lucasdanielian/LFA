@@ -44,7 +44,7 @@ public class Coluna {
         this.motivo = motivo;
     }
     
-    public void setIgual(){
+    public void setNotIgual(){
         this.igual = false;
     }
 }

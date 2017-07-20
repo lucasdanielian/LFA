@@ -25,7 +25,7 @@ public class Estado {
     }
     
     public void setInicial(){
-        this.isFinal = true;
+        this.isInicial = true;
     }
     
     public void setFinal(){
@@ -34,6 +34,10 @@ public class Estado {
     
     public String getEstado(){
         return estado;
+    }
+    
+    public boolean getIsInicial(){
+        return isInicial;
     }
     
     public boolean getIsFinal(){
