@@ -15,9 +15,9 @@ public class Coluna {
     public Indice indice;
     public boolean igual;
     public ArrayList<Indice> propagacao;
-    public ArrayList<String> motivo;
+    public String motivo;
     
-    public Coluna(Indice indice, boolean igual, ArrayList<Indice> propagacao, ArrayList<String> motivo){
+    public Coluna(Indice indice, boolean igual, ArrayList<Indice> propagacao, String motivo){
         this.indice = indice;
         this.igual = igual;
         this.propagacao = propagacao;
@@ -36,8 +36,16 @@ public class Coluna {
         return this.propagacao;
     }
     
-    public ArrayList<String> getMotivo(){
-        return this.motivo;
+    public String getMotivo(){
+        return motivo;
+    }
+    
+    public void setMotivo(String motivo){
+        this.motivo = motivo;
+    }
+    
+    public void setIgual(){
+        this.igual = false;
     }
 }
 

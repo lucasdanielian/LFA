@@ -18,12 +18,18 @@ import java.util.ArrayList;
  * @author raydson
  */
 public class Automato {
-    private ArrayList<String> estados;
+    private ArrayList<Estado> estados;
     private ArrayList<String> estadosIniciais;
     private ArrayList<String> estadosFinais;
     private ArrayList<String> alfabeto;
-    private ArrayList<String> transicoes;
+    private ArrayList<Transicao> transicoes;
     private ArrayList<Coluna> matriz;
+    
+    
+    private Indice indiceAux;
+    private boolean igualAux;
+    private ArrayList<Indice> propagacaoAux;
+    private String motivoAux;
     
     public Automato(String nomeArquivo) {
         estados = new ArrayList<>();
@@ -50,11 +56,15 @@ public class Automato {
                 linha = linha.replace("}", "");
                 String[] novosEstados = linha.split(","); 
                 for(int i=0; i<novosEstados.length; i++){
-                    estados.add(novosEstados[i]);
+                    Estado novoEstado = new Estado();
+                    novoEstado.setEstado(novosEstados[i]);
+                    estados.add(novoEstado);
                 }
             }
             else {
-                estados.add(linha);
+                Estado novoEstado = new Estado();
+                novoEstado.setEstado(linha);
+                estados.add(novoEstado);
             }
             
             linha = automato.readLine();
@@ -73,11 +83,30 @@ public class Automato {
             linha = automato.readLine();
             if(linha.charAt(0) == '{')
                 linha = automato.readLine();
+            
             while(linha.charAt(linha.length() - 1) == ','){
-                transicoes.add(linha.replace(",", ""));
+                
+                Transicao novaTransicao = new Transicao();
+                linha = linha.replace("(", "");
+                linha = linha.replace(")", "");
+                linha = linha.replace("->",",");
+                System.out.println(linha);
+                String[] aux = linha.split(",");
+                novaTransicao.setOrigem(aux[0]);
+                novaTransicao.setTerminal(aux[1]);
+                novaTransicao.setDestino(aux[2]);
+                transicoes.add(novaTransicao);
                 linha = automato.readLine();
             }
-            transicoes.add(linha);
+            Transicao novaTransicao = new Transicao();
+            linha.replace("(", "");
+            linha.replace(")", "");
+            linha.replace("->",",");
+            String[] aux = linha.split(",");
+            novaTransicao.setOrigem(aux[0]);
+            novaTransicao.setTerminal(aux[1]);
+            novaTransicao.setDestino(aux[2]);
+            transicoes.add(novaTransicao);
             
             linha = automato.readLine();
             if(linha.charAt(0) == '}'){
@@ -89,12 +118,21 @@ public class Automato {
                 linha = linha.replace("}", "");
                 String[] iniciais = linha.split(",");
                 for(int i=0; i<iniciais.length; i++){
-                    estadosIniciais.add(iniciais[i]);
+                    for(int j=0; j<estados.size(); j++){
+                        if(iniciais[i].equals(estados.get(j).getEstado())){
+                            estados.get(j).setInicial();
+                        }
+                    }
+                    //estadosFinais.add(finais[i]);
                 }
             }
             else{
-                estadosIniciais.add(linha);
-            }            
+                for(int j=0; j<estados.size(); j++){
+                        if(linha.equals(estados.get(j).getEstado())){
+                            estados.get(j).setInicial();
+                        }
+                    }
+            }      
             
             linha = automato.readLine();
             if(linha.charAt(0) == '{'){
@@ -102,12 +140,23 @@ public class Automato {
                 linha = linha.replace("}", "");
                 String[] finais = linha.split(",");
                 for(int i=0; i<finais.length; i++){
-                    estadosFinais.add(finais[i]);
+                    for(int j=0; j<estados.size(); j++){
+                        if(finais[i].equals(estados.get(j).getEstado())){
+                            estados.get(j).setFinal();
+                        }
+                    }
+                    //estadosFinais.add(finais[i]);
                 }
             }
             else{
-                estadosFinais.add(linha);
+                for(int j=0; j<estados.size(); j++){
+                        if(linha.equals(estados.get(j).getEstado())){
+                            estados.get(j).setFinal();
+                        }
+                    }
             }
+            
+            
         }
         catch(Exception e){
             System.out.println("Erro ao ler o arquivo :: " + e);
@@ -116,8 +165,8 @@ public class Automato {
     
     public void imprimePraMim(){
         System.out.print("Estados -> " );
-        for(String aux : estados){
-           System.out.println(aux);
+        for(Estado aux : estados){
+           System.out.println(aux.getEstado());
         }
         
         System.out.print("Afabeto -> " );
@@ -126,8 +175,8 @@ public class Automato {
         }
         
         System.out.print("Transições -> " );
-        for(String aux : transicoes){
-           System.out.println(aux);
+        for(Transicao aux : transicoes){
+           System.out.println(aux.getOrigem() + "," + aux.getTerminal() + "->" + aux.getDestino());
         }
         
         System.out.print("Estados Iniciais -> " );
@@ -144,35 +193,83 @@ public class Automato {
     public void formatarTabela() {
         
         // cria a matriz para calcular o AFD minimizado.
-        Indice indiceAux;
-        boolean igualAux;
-        ArrayList<Indice> propagacaoAux = new ArrayList<Indice>();
-        ArrayList<String> motivoAux = new ArrayList<String>();
-
+        
 
         // insere todas as linha da matriz - combinações [i, j].
         for (int i = 0; i < estados.size(); i++) {
                 for (int j = i + 1; j < estados.size(); j++) {
                         indiceAux = new Indice (i,j);
                         igualAux = true;
-                        propagacaoAux = null;
-                        motivoAux = null;
+                        propagacaoAux = new ArrayList<Indice>();
+                        motivoAux = "nao tem motivo";
                         Coluna coluna = new Coluna(indiceAux,igualAux,propagacaoAux,motivoAux);
                         matriz.add(coluna);
                 }
         }
+       
+    }
+    
+    public void minimizar(){ // resolve o problema de fato
+        for(Coluna coluna : matriz){
+            String indice = coluna.indice.toString();
+            indice = indice.replace("[", "");
+            indice = indice.replace("]", "");
+            String[] aux = indice.split(","); // cada indice do vetor fica com um dos estados envolvidos
+            
+            aux[0] = "q" + aux[0];
+            aux[1] = "q" + aux[1];
+            
+            
+            Estado init = new Estado();
+            Estado dest = new Estado();
+            
+            for(Estado estado : estados){
+                if(estado.getEstado().equals(aux[0])){
+                    init = estado;
+                }
+                if(estado.getEstado().equals(aux[1])){
+                    dest = estado;
+                }
+            }
+            
+            // raydson deve consertar a leittura dos estados para que a funcao abaixo funcione
+            
+            System.out.println(init.getIsFinal()+ ","+dest.getIsFinal());
+            
+            if(init.getIsFinal() == false && dest.getIsFinal() == true){ // nao e possivel simplicar
+                coluna.setMotivo("Nao final / final");
+                coluna.setIgual();
+                //aqui deve ser inserida a questao da propagação
+            }
+            else{
+                if(init.getIsFinal() == true && dest.getIsFinal() == false){ // nao é possivel simplificar
+                    coluna.setMotivo("Final/ Nao final");
+                    coluna.setIgual();
+                    //aqui deve ser inserida a qestao da propagação
+                }
+                else{
+                    //william inserir sua matriz aqui;
+                    
+                }
+            }
+            
+           
+           
+            
+        }
         
         try{
             FileWriter arq = new FileWriter("resultado.txt");
-            arq.write("INDICE\tD[i,j] = \t S[i,j] = \t MOTIVO \n");
+            arq.write("INDICE\t\tD[i,j] = \t\t S[i,j] = \t\t MOTIVO \n");
             
             for(Coluna coluna :matriz){
-                arq.write(coluna.getIndice().toString() + "\t" + coluna.igual + "\t" + "\n");
+                arq.write(coluna.getIndice().toString() + "\t\t" + coluna.getIgual() + "\t\t\t" + "\t\t\t" + coluna.getMotivo() + "\n");
             }
             arq.close();
         }
         catch(Exception e){
             
         }
+        
     }
 }
