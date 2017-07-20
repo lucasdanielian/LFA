@@ -7,42 +7,41 @@ package minimizacao;
 
 /**
  *
- * @author Lucas
+ * @author raydson
  */
-public class Transicao {
-    String origem;
-    String terminal;
-    String destino;
+class Transicao {
+    int origem;
+    char terminal;
+    int destino;
+    
     
     public Transicao(){
-        origem = null;
-        terminal = null;
-        destino = null;
-    }
+        origem = -1;
+        terminal = 'N';
+        destino = -1;
+}
     
-    public void setOrigem(String origem){
+    public void setOrigem(int origem){
         this.origem = origem;
     }
     
-    public void setTerminal(String terminal){
+    public void setTerminal(char terminal){
         this.terminal = terminal;
     }
     
-    public void setDestino(String destino){
+    public void setDestino(int destino){
         this.destino = destino;
     }
     
-    public String getOrigem(){
+    public int getOrigem(){
         return origem;
     }
     
-    public String getTerminal(){
+    public char getTerminal(){
         return terminal;
     }
     
-    public String getDestino(){
+    public int getDestino(){
         return destino;
     }
-    
-    
 }
