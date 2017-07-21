@@ -17,11 +17,14 @@ public class Coluna {
     public ArrayList<Indice> propagacao;
     public String motivo;
     
+    public boolean marcado;
+    
     public Coluna(Indice indice, boolean igual, ArrayList<Indice> propagacao, String motivo){
         this.indice = indice;
         this.igual = igual;
         this.propagacao = propagacao;
         this.motivo = motivo;
+        this.marcado = false;
     }
     
     public Indice getIndice(){
@@ -40,12 +43,20 @@ public class Coluna {
         return motivo;
     }
     
+    public boolean getMarcado() {
+        return this.marcado;
+    }
+    
     public void setMotivo(String motivo){
         this.motivo = motivo;
     }
     
     public void setNotIgual(){
         this.igual = false;
+    }
+    
+    public void setMarcado() {
+        this.marcado = true;
     }
 }
 
