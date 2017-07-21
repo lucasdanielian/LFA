@@ -12,10 +12,21 @@ package minimizacao;
 public class Indice {
     public int i;
     public int j;
+    public int linhaTabela;
+    public static int cont = 0;
 
     public Indice(int i, int j) {
             this.i = i;
             this.j = j;
+            this.linhaTabela = cont;
+            cont++;
+    }
+    
+    public Indice(int i, int j, boolean noIncrement) {
+        // para nao afetar contagem, indice auxiliar
+            this.i = i;
+            this.j = j;
+            this.linhaTabela = -1;
     }
     
     public void setIndice(int iNovo, int jNovo){

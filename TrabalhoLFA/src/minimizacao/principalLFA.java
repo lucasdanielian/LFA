@@ -13,8 +13,8 @@ package minimizacao;
 public class principalLFA {
     public static void main(String[] args){
         Automato automato = new Automato("lfa");
-        System.out.println("vai imprimir");
-        automato.imprimePraMim();
+        //System.out.println("vai imprimir");
+        //automato.imprimePraMim();
         automato.formatarTabela();
         automato.minimizar();
     }
