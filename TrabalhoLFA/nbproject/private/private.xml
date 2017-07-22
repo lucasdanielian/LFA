@@ -3,12 +3,16 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/home/user/Área%20de%20Trabalho/LFA/TrabalhoLFA/src/minimizacao/Automato.java</file>
-            <file>file:/home/user/Área%20de%20Trabalho/LFA/TrabalhoLFA/src/minimizacao/Estado.java</file>
-            <file>file:/home/user/Área%20de%20Trabalho/LFA/TrabalhoLFA/src/minimizacao/Transicao.java</file>
-            <file>file:/home/user/Área%20de%20Trabalho/LFA/TrabalhoLFA/src/minimizacao/Indice.java</file>
-            <file>file:/home/user/Área%20de%20Trabalho/LFA/TrabalhoLFA/src/minimizacao/Coluna.java</file>
-            <file>file:/home/user/Área%20de%20Trabalho/LFA/TrabalhoLFA/resultado.txt</file>
+            <file>file:/home/raydson/Documentos/LFA1/TrabalhoLFA/src/minimizacao/ioArquivo.java</file>
+            <file>file:/home/raydson/Documentos/LFA1/TrabalhoLFA/src/executavel/principalLFA.java</file>
+            <file>file:/home/raydson/Documentos/LFA1/TrabalhoLFA/resultado.txt</file>
+            <file>file:/home/raydson/Documentos/LFA1/TrabalhoLFA/src/minimizacao/Estado.java</file>
+            <file>file:/home/raydson/Documentos/LFA1/TrabalhoLFA/src/minimizacao/Automato.java</file>
+            <file>file:/home/raydson/Documentos/LFA1/TrabalhoLFA/src/minimizacao/Coluna.java</file>
+            <file>file:/home/raydson/Documentos/LFA1/TrabalhoLFA/src/minimizacao/Transicao.java</file>
+            <file>file:/home/raydson/Documentos/LFA1/TrabalhoLFA/lfa.txt</file>
+            <file>file:/home/raydson/Documentos/LFA1/TrabalhoLFA/src/minimizacao/Indice.java</file>
+            <file>file:/home/raydson/Documentos/LFA1/TrabalhoLFA/afd%20minimizado.txt</file>
         </group>
     </open-files>
 </project-private>
