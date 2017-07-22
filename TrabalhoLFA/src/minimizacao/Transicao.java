@@ -10,18 +10,18 @@ package minimizacao;
  * @author raydson
  */
 class Transicao {
-    int origem;
+    String origem;
     char terminal;
-    int destino;
+    String destino;
     
     
     public Transicao(){
-        origem = -1;
+        origem = "";
         terminal = 'N';
-        destino = -1;
+        destino = "";
 }
     
-    public void setOrigem(int origem){
+    public void setOrigem(String origem){
         this.origem = origem;
     }
     
@@ -29,11 +29,11 @@ class Transicao {
         this.terminal = terminal;
     }
     
-    public void setDestino(int destino){
+    public void setDestino(String destino){
         this.destino = destino;
     }
     
-    public int getOrigem(){
+    public String getOrigem(){
         return origem;
     }
     
@@ -41,7 +41,7 @@ class Transicao {
         return terminal;
     }
     
-    public int getDestino(){
+    public String getDestino(){
         return destino;
     }
 }

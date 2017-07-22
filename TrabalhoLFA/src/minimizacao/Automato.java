@@ -2,13 +2,10 @@ package minimizacao;
 
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import javax.sound.midi.Soundbank;
-import sun.awt.X11.XConstants;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -41,10 +38,8 @@ public class Automato {
         matriz = new ArrayList<>();
         
         try{
-            ioArquivo io = new ioArquivo();
-            BufferedReader automato = io.lerArquivo(nomeArquivo);
+            BufferedReader automato = new BufferedReader(new FileReader(nomeArquivo + ".txt"));
             String linha = automato.readLine();
-            System.out.println(linha);
             
             linha = automato.readLine();
             if(linha.charAt(0) == '{'){
@@ -75,8 +70,9 @@ public class Automato {
             }
             
             linha = automato.readLine();
-            if(linha.charAt(0) == '{')
+            if(linha.contains("{")){
                 linha = automato.readLine();
+            }
             
             while(linha.charAt(linha.length() - 1) == ','){
                 
@@ -84,11 +80,10 @@ public class Automato {
                 linha = linha.replace("(", "");
                 linha = linha.replace(")", "");
                 linha = linha.replace("->",",");
-                linha = linha.replace("q", "");
                 String[] aux = linha.split(",");
-                novaTransicao.setOrigem(Integer.parseInt(aux[0]));
+                novaTransicao.setOrigem(aux[0]);
                 novaTransicao.setTerminal(aux[1].charAt(0));
-                novaTransicao.setDestino(Integer.parseInt(aux[2]));
+                novaTransicao.setDestino(aux[2]);
                 transicoes.add(novaTransicao);
                 linha = automato.readLine();
             }
@@ -96,11 +91,10 @@ public class Automato {
             linha = linha.replace("(", "");
             linha = linha.replace(")", "");
             linha = linha.replace("->",",");
-            linha = linha.replace("q", "");
             String[] aux = linha.split(",");
-            novaTransicao.setOrigem(Integer.parseInt(aux[0]));
+            novaTransicao.setOrigem(aux[0]);
             novaTransicao.setTerminal(aux[1].charAt(0));
-            novaTransicao.setDestino(Integer.parseInt(aux[2]));
+            novaTransicao.setDestino(aux[2]);
             transicoes.add(novaTransicao);
             
             linha = automato.readLine();
@@ -123,10 +117,10 @@ public class Automato {
             else{
                 linha = linha.replace(",", "");
                 for(int j=0; j<estados.size(); j++){
-                        if(linha.equals(estados.get(j).getEstado())){
-                            estados.get(j).setInicial();
-                        }
+                    if(linha.equals(estados.get(j).getEstado())){
+                        estados.get(j).setInicial();
                     }
+                }
             }      
             
             linha = automato.readLine();
@@ -144,13 +138,11 @@ public class Automato {
             }
             else{
                 for(int j=0; j<estados.size(); j++){
-                        if(linha.equals(estados.get(j).getEstado())){
-                            estados.get(j).setFinal();
-                        }
+                    if(linha.equals(estados.get(j).getEstado())){
+                        estados.get(j).setFinal();
                     }
+                }
             }
-            
-            
         }
         catch(Exception e){
             System.out.println("Erro ao ler o arquivo :: " + e);
@@ -197,20 +189,15 @@ public class Automato {
         
         for(int i = 0; i < estados.size(); i++){
             for(Transicao transicao : transicoes){
-                int origem = transicao.getOrigem();
-                int destino = transicao.getDestino();
+                String origem = transicao.getOrigem();
+                origem = origem.replace("q", "");
+                String destino = transicao.getDestino();
+                destino = destino.replace("q", "");
                 int letra = Character.getNumericValue(transicao.getTerminal());
                 // 'A' e 'a' é igual a 10, não diferencia maius. de minusc.
-                matrizDeTransicao[origem][letra-10] = destino;
+                matrizDeTransicao[Integer.parseInt(origem)][letra-10] = Integer.parseInt(destino);
             }
         }
-        /*
-        for(int i = 0; i < estados.size(); i++){
-            for(int j = 0; j < alfabeto.size(); j++){
-                System.out.print(matrizDeTransicao[i][j] + " ");
-            }
-            System.out.print("\n");
-        }*/
 
         // insere todas as linha da matriz - combinações [i, j].
         for (int i = 0; i < estados.size(); i++) {
@@ -345,7 +332,8 @@ public class Automato {
                     for (Coluna C : matriz) {
                         if (C.indice.i == dest_i && C.indice.j == dest_j && !C.marcado &&
                                 C.indice.i != coluna.indice.i && C.indice.j != coluna.indice.j) {
-                            C.propagacao.add(coluna.indice);
+                            if(!C.propagacao.contains(coluna.indice))
+                                C.propagacao.add(coluna.indice);
                             break;
                         }
                     }
@@ -381,28 +369,140 @@ public class Automato {
         catch(Exception e){
             
         }
-        
+        //Não to dando conta
         String e1 = "";
         for(Coluna colunaux : matriz){
             if(colunaux.getIgual()){
-                if(e1.contains("q" + colunaux.indice.i)){
-                    e1 = e1 + "q" + colunaux.indice.j;
+                for (Estado estado : estados){
+                    if(estado.getEstado().contains("q" + colunaux.indice.i)){
+                        if(!estado.getEstado().contains("q" + colunaux.indice.j)){
+                            if(estado.getIsInicial()){
+                                estados.get(colunaux.indice.j).setInicial();
+                                estados.get(colunaux.indice.i).setInicial();
+                            }
+                            estado.setEstado(estado.getEstado() + "q" + colunaux.indice.j);
+                            e1 = "q" + colunaux.indice.j;
+                        }
+                    }
+                       
                 }
-                else{
-                    e1 = "q" + colunaux.indice.i + "q" + colunaux.indice.j;
+                
+                int id = -1;
+                for(int i=0; i < estados.size(); i++){
+                    if(estados.get(i).getEstado().equals(e1))
+                        id = i;
                 }
-                Estado novoEstado = new Estado();
-                novoEstado.setEstado(e1);
-                estados.add(novoEstado);
+                if(id != -1){
+                    estados.remove(id);
+                }
+                
+                for(Transicao t : transicoes){
+                    if(t.getOrigem().contains("q" + colunaux.indice.i)){
+                        if(!t.getOrigem().contains("q" + colunaux.indice.j)){
+                            t.setOrigem(t.getOrigem() + "q" + colunaux.indice.j);
+                            e1 = "q" + colunaux.indice.j;
+                        }
+                    }
+                }
+                
+                id = -1;
+                for(int i=0; i < transicoes.size(); i++){
+                    if(transicoes.get(i).getOrigem().equals(e1))
+                        id = i;
+                }
+                if(id != -1){
+                    transicoes.remove(id);
+                }
+
+                for(Transicao t : transicoes){
+                    if(t.getDestino().contains("q" + colunaux.indice.i)){
+                        if(!t.getDestino().contains("q" + colunaux.indice.j)){
+                            t.setDestino(t.getDestino() + "q" + colunaux.indice.j);
+                            e1 = "q" + colunaux.indice.j;
+                        }
+                    }
+                }
+                
+                id = -1;
+                for(int i=0; i < transicoes.size(); i++){
+                    if(transicoes.get(i).getOrigem().equals(e1))
+                        id = i;
+                }
+                if(id != -1){
+                    transicoes.remove(id);
+                }
+                
+                for(Transicao t : transicoes){
+                    if(t.getOrigem().contains("q" + colunaux.indice.j)){
+                        if(!t.getOrigem().contains("q" + colunaux.indice.i)){
+                            t.setOrigem("q" + colunaux.indice.i + t.getOrigem());
+                            e1 = "q" + colunaux.indice.i;
+                        }
+                    }
+                }
+                
+                id = -1;
+                for(int i=0; i < transicoes.size(); i++){
+                    if(transicoes.get(i).getOrigem().equals(e1))
+                        id = i;
+                }
+                if(id != -1){
+                    transicoes.remove(id);
+                }
+                
+                for(Transicao t : transicoes){
+                    if(t.getDestino().contains("q" + colunaux.indice.j)){
+                        if(!t.getDestino().contains("q" + colunaux.indice.i)){
+                            t.setDestino("q" + colunaux.indice.i + t.getDestino());
+                            e1 = "q" + colunaux.indice.i;
+                        }
+                    }
+                }
+                
+                id = -1;
+                for(int i=0; i < transicoes.size(); i++){
+                    if(transicoes.get(i).getOrigem().equals(e1))
+                        id = i;
+                }
+                if(id != -1){
+                    transicoes.remove(id);
+                }
             }
         }
+            
         
         try{
             FileWriter arq = new FileWriter("afd minimizado.txt");
-            arq.write("(\n\t");
+            arq.write("(\n    {");
+            
             for(Estado e : estados){
                 arq.write(e.getEstado() + ",");
             }
+            
+            arq.write("},\n    {");
+            
+            for(String letras : alfabeto){
+                arq.write(letras + ",");
+            }
+            
+            arq.write("},\n    {\n");
+            
+            for(Transicao t : transicoes){
+                arq.write("        (" + t.getOrigem() + "," + t.terminal + "->" + 
+                        t.getDestino() + "),\n");
+            }
+            for(Estado aux : estados){
+                if(aux.getIsInicial())
+                    arq.write("    },\n    " + aux.getEstado() + ",\n    {");
+            }
+            
+            for(Estado aux : estados){
+                if(aux.getIsFinal())
+                    arq.write(aux.getEstado() + ",");
+            }
+            
+            arq.write("}\n)");
+            
             arq.close();
         }
         catch(Exception e){
