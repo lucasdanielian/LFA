@@ -1,81 +1,115 @@
 package minimizacao;
 
-
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/**
- *
- * @author raydson
- */
 public class Automato {
+    /**
+     * Atributos básicos:
+     * * estados - armazena todos os estados do autômato em um ArrayList do objeto
+     * * alfabeto - armazena todos os símbolos do alfabeto em um ArrayList de String
+     * * transicoes - armazena todas as transições possíveis do autômato
+     * * matriz - armazena a tabela de minimização em que será aplicado o algortimo
+     */
     private ArrayList<Estado> estados;
     private ArrayList<String> alfabeto;
     private ArrayList<Transicao> transicoes;
-    private ArrayList<Coluna> matriz;
-    
+    private ArrayList<Linha> matriz;
+    /**
+     * Atributos auxiliares:
+     * * indiceAux - 
+     * * igualAux -
+     * * propagacaoAux -
+     * * motivoAux -
+     */
     private Indice indiceAux;
     private boolean igualAux;
     private ArrayList<Indice> propagacaoAux;
     private String motivoAux;
-    
+    /**
+     * Atributo:
+     * * matrizDeTransicao - estrutura de dados que armazena todas as transições 
+     * do autômato em uma matriz, para que a aplicação da função de transição
+     * (delta) seja rápida e simplificada, pois basta acessar uma célula da 
+     * matriz para se obter o estado de destino a partir da linha (estado de
+     * origem) e da coluna (símbolo lido) da mesma
+     * 
+     * A estrutura da matriz é assim:
+     * * cada linha i representa um estado "qi" do AFD
+     * * cada coluna j representa um símbolo do alfabeto (mapeado em inteiro)
+     * * cada célula representa o estado "q" de destino da transição "qi" lendo "j"
+     * 
+     */
     private Integer[][] matrizDeTransicao;
-
     
+    /**
+     * Construtor da classe autômato (AFD).
+     * 
+     * O construtor identifica cada uma dos elementos formais do arquivo e os insere
+     * nos respectivos atributos básicos do objeto criado
+     * 
+     * @param nomeArquivo - nome do arquivo de entrada contendo o AFD original a
+     * ser minimizado
+     */
     public Automato(String nomeArquivo) {
+        // Inicializa os atributos
         estados = new ArrayList<>();
         alfabeto = new ArrayList<>();
         transicoes = new ArrayList<>();
         matriz = new ArrayList<>();
         
+        this.lerArquivo(nomeArquivo);
+    }
+    
+    /**
+     * Metodo lerArquivo.
+     * 
+     * Lê o arquivo todo e insere as iformações nos atributos de uma vez
+     * não insere nada na "matriz" por enquanto, isso é feito em outro método
+     * 
+     * @param nomeArquivo - nome do arquivo de entrada contendo o AFD original a
+     * ser minimizado
+     */
+    public void lerArquivo(String nomeArquivo){   
         try{
             BufferedReader automato = new BufferedReader(new FileReader(nomeArquivo + ".txt"));
             String linha = automato.readLine();
             
             linha = automato.readLine();
-            if(linha.charAt(0) == '{'){
-                linha = linha.replace("{", "");
-                linha = linha.replace("}", "");
-                String[] novosEstados = linha.split(","); 
-                for (String novosEstado : novosEstados) {
-                    Estado novoEstado = new Estado();
-                    novoEstado.setEstado(novosEstado);
-                    estados.add(novoEstado);
-                }
+            while(linha.charAt(0) != '{'){
+                linha = linha.substring(1);
             }
-            else {
+            linha = linha.replace("{", "");
+            linha = linha.replace("}", "");
+            String[] novosEstados = linha.split(","); 
+            for (String novosEstado : novosEstados) {
                 Estado novoEstado = new Estado();
-                novoEstado.setEstado(linha);
+                novoEstado.setEstado(novosEstado);
                 estados.add(novoEstado);
             }
             
             linha = automato.readLine();
-            if(linha.charAt(0) == '{'){
-                linha = linha.replace("{", "");
-                linha = linha.replace("}", "");
-                String[] novoAlfabeto = linha.split(",");
-                alfabeto.addAll(Arrays.asList(novoAlfabeto));
+            while(linha.charAt(0) != '{'){
+                linha = linha.substring(1);
             }
-            else{
-                alfabeto.add(linha);
-            }
-            
+            linha = linha.replace("{", "");
+            linha = linha.replace("}", "");
+            String[] novoAlfabeto = linha.split(",");
+            alfabeto.addAll(Arrays.asList(novoAlfabeto));
+
             linha = automato.readLine();
             if(linha.contains("{")){
                 linha = automato.readLine();
             }
             
-            while(linha.charAt(linha.length() - 1) == ','){
+            while(!linha.contains("}")){
                 
+                while(linha.charAt(0) != '('){
+                    linha = linha.substring(1);
+                }
                 Transicao novaTransicao = new Transicao();
                 linha = linha.replace("(", "");
                 linha = linha.replace(")", "");
@@ -87,58 +121,32 @@ public class Automato {
                 transicoes.add(novaTransicao);
                 linha = automato.readLine();
             }
-            Transicao novaTransicao = new Transicao();
-            linha = linha.replace("(", "");
-            linha = linha.replace(")", "");
-            linha = linha.replace("->",",");
-            String[] aux = linha.split(",");
-            novaTransicao.setOrigem(aux[0]);
-            novaTransicao.setTerminal(aux[1].charAt(0));
-            novaTransicao.setDestino(aux[2]);
-            transicoes.add(novaTransicao);
-            
+
             linha = automato.readLine();
-            if(linha.charAt(0) == '}'){
-                linha = automato.readLine();                
+            while(linha.charAt(0) != 'q'){
+                linha = linha.substring(1);
             }
-            
-            if(linha.charAt(0) == '{'){
-                linha = linha.replace("{", "");
-                linha = linha.replace("}", "");
-                String[] iniciais = linha.split(",");
-                for (int i=0; i < iniciais.length; i++) {
-                    for (int j = 0; j<estados.size(); j++) {
-                        if (iniciais[i].equals(estados.get(j).getEstado())) {
-                            estados.get(j).setInicial();
-                        }
-                    }
-                }
-            }
-            else{
-                linha = linha.replace(",", "");
-                for(int j=0; j<estados.size(); j++){
-                    if(linha.equals(estados.get(j).getEstado())){
+            linha = linha.replace("{", "");
+            linha = linha.replace("}", "");
+            String[] iniciais = linha.split(",");
+            for (int i=0; i < iniciais.length; i++) {
+                for (int j = 0; j<estados.size(); j++) {
+                    if (iniciais[i].equals(estados.get(j).getEstado())) {
                         estados.get(j).setInicial();
                     }
                 }
-            }      
-            
-            linha = automato.readLine();
-            if(linha.charAt(0) == '{'){
-                linha = linha.replace("{", "");
-                linha = linha.replace("}", "");
-                String[] finais = linha.split(",");
-                for(int i=0; i<finais.length; i++){
-                    for(int j=0; j<estados.size(); j++){
-                        if(finais[i].equals(estados.get(j).getEstado())){
-                            estados.get(j).setFinal();
-                        }
-                    }
-                }
             }
-            else{
+
+            linha = automato.readLine();
+            while(linha.charAt(0) != '{'){
+                linha = linha.substring(1);
+            }
+            linha = linha.replace("{", "");
+            linha = linha.replace("}", "");
+            String[] finais = linha.split(",");
+            for(int i=0; i<finais.length; i++){
                 for(int j=0; j<estados.size(); j++){
-                    if(linha.equals(estados.get(j).getEstado())){
+                    if(finais[i].equals(estados.get(j).getEstado())){
                         estados.get(j).setFinal();
                     }
                 }
@@ -149,35 +157,16 @@ public class Automato {
         }
     }
     
-    public void imprimePraMim(){
-        System.out.print("Estados -> " );
-        for(Estado aux : estados){
-           System.out.println(aux.getEstado());
-        }
-        
-        System.out.print("Afabeto -> " );
-        for(String aux : alfabeto){
-           System.out.println(aux);
-        }
-        
-        System.out.print("Transições -> " );
-        for(Transicao aux : transicoes){
-           System.out.println(aux.getOrigem() + "," + aux.getTerminal() + "->" + aux.getDestino());
-        }
-        
-        System.out.print("Estados Iniciais -> " );
-        for(Estado aux : estados){
-            if(aux.getIsInicial())
-        System.out.println(aux.getEstado());
-        }
-        
-        System.out.print("Estados Finais-> " );
-        for(Estado aux : estados){
-            if(aux.getIsFinal())
-            System.out.println(aux.getEstado());
-        }
-    }
-    
+    /**
+     * Método que constrói a tabela de minimização.
+     * 
+     * Após o programa ler o arquivo e armazenar as informações do AFD,
+     * este método faz com que o atributo "matriz" guarde a tabela de minimização
+     * que será escrita em um dos arquivos de saída (e.g. Tabela.txt) como
+     * também cria a matriz de transição que será utilizada como função de transição
+     * no processo de minimização (delta)
+     * Executa o passo 1 do algoritmo da apostila
+     */
     public void formatarTabela() {
         
         matrizDeTransicao = new Integer[estados.size()][alfabeto.size()];
@@ -198,25 +187,37 @@ public class Automato {
                 matrizDeTransicao[Integer.parseInt(origem)][letra-10] = Integer.parseInt(destino);
             }
         }
-
-        // insere todas as linha da matriz - combinações [i, j].
+        
+        // passo 1 do algoritmo do Terra - pág. 145
+        // insere todas as linha da matriz - combinações [i, j]
+        // marca todos como supostamente iguais
         for (int i = 0; i < estados.size(); i++) {
                 for (int j = i + 1; j < estados.size(); j++) {
-                    indiceAux = new Indice (i,j);
+                    indiceAux = new Indice(i,j);
                     igualAux = true;
                     propagacaoAux = new ArrayList<>();
                     motivoAux = "-"; // não tem motivo
-                    Coluna coluna = new Coluna(indiceAux, igualAux, propagacaoAux, motivoAux);
-                    matriz.add(coluna);
+                    Linha linha = new Linha(indiceAux, igualAux, propagacaoAux, motivoAux);
+                    matriz.add(linha);
                 }
         }
        
     }
     
-    public void minimizar(){ // resolve o problema de fato
+    /**
+     * Resolve o problema de fato.
+     * Todo o processo de minimização é feito aqui
+     * Implementação baseada no algoritmo descrito na apostila
+     * Executa os passos 2, 3 e 4.
+     */
+    public void minimizar(String arquivo1, String arquivo2){           
+        this.formatarTabela(); // passo 1
+        
         // passo 2 do algoritmo do Terra - pág. 145
-        for(Coluna coluna : matriz){
-            String indice = coluna.indice.toString();
+        // para cada par de estados, se um for final e outro não, marca como
+        // diferentes
+        for(Linha linha : matriz){
+            String indice = linha.indice.toString();
             indice = indice.replace("[", "");
             indice = indice.replace("]", "");
             String[] aux = indice.split(","); // cada indice do vetor fica com um dos estados envolvidos
@@ -236,61 +237,29 @@ public class Automato {
                 }
             }
             
-            if(init.getIsFinal() == false && dest.getIsFinal() == true){ // nao e possivel simplificar
-                coluna.setMotivo("final/nao-final");
-                coluna.setNotIgual();
-                coluna.setMarcado();
-                //aqui deve ser inserida a questao da propagação - não precisa!
-                //propagar(coluna);
+            if(init.getIsFinal() == false && dest.getIsFinal() == true){ 
+                linha.setMotivo("final/nao-final");
+                linha.setNotIgual();
+                linha.setMarcado();
             }
-            else if(init.getIsFinal() == true && dest.getIsFinal() == false){ // nao é possivel simplificar
-                coluna.setMotivo("final/nao-final");
-                coluna.setNotIgual();
-                coluna.setMarcado();
-                //aqui deve ser inserida a qestao da propagação - não precisa!
-                //propagar(coluna);
+            else if(init.getIsFinal() == true && dest.getIsFinal() == false){ 
+                linha.setMotivo("final/nao-final");
+                linha.setNotIgual();
+                linha.setMarcado();
             }
-            
-            /*
-            
-            else {
-                // insere propagação 
-                int i = coluna.indice.i;
-                int j = coluna.indice.j;
-                
-                for (int simbolo = 0; simbolo < alfabeto.size(); simbolo++) {
-                    int dest_i = matrizDeTransicao[i][simbolo];
-                    int dest_j = matrizDeTransicao[j][simbolo];
-
-                    // ordena, sempre i < j:
-                    if (dest_i > dest_j) {
-                        int auxSwap = dest_i;
-                        dest_i = dest_j;
-                        dest_j = auxSwap;
-                    }
-                    
-                    //Indice indexAux = new Indice(dest_i, dest_j, false);
-                    
-                    for (Coluna C : matriz) {
-                        if (C.indice.i == dest_i && C.indice.j == dest_j && !C.getMarcado()) {
-                            C.propagacao.add(coluna.indice);
-                            break;
-                        }
-                    }
-                    
-                }                    
-            }*/
         }  
         
-        
-        // passo 3 do algortimo
-        for(Coluna coluna : matriz) {
-            if (coluna.getMarcado()) {
+        // passo 3 do algortimo do Terra - pág. 145
+        // verifica se para cada par de estados lendo o mesmo símbolo caem em estados
+        // com mesmo tipo (final/não-final), inserindo a propagação se forem iguais
+        // ou propagando a distinção caso contrário
+        for(Linha linha : matriz) {
+            if (linha.getMarcado()) {
                 continue;
             }
             
-            int i = coluna.indice.i;
-            int j = coluna.indice.j;
+            int i = linha.indice.i;
+            int j = linha.indice.j;
 
             Estado dest1 = new Estado();
             Estado dest2 = new Estado();
@@ -321,19 +290,19 @@ public class Automato {
                 if(dest1.getIsFinal() == false && dest2.getIsFinal() == true ||
                         dest1.getIsFinal() == true && dest2.getIsFinal() == false) {
                     String indiceProp = "[" + Integer.toString(dest_i) + "," + Integer.toString(dest_j) + "]";
-                    coluna.setMotivo(alfabeto.get(simbolo) + indiceProp);
-                    coluna.setNotIgual();
+                    linha.setMotivo(alfabeto.get(simbolo) + indiceProp);
+                    linha.setNotIgual();
                     //aqui deve ser inserida a questao da propagação
-                    propagar(coluna); // método recursivo
+                    propagar(linha); // método recursivo
                 }
                 else  {
                     // insere propagação                     
                     
-                    for (Coluna C : matriz) {
+                    for (Linha C : matriz) {
                         if (C.indice.i == dest_i && C.indice.j == dest_j && !C.marcado &&
-                                C.indice.i != coluna.indice.i && C.indice.j != coluna.indice.j) {
-                            if(!C.propagacao.contains(coluna.indice))
-                                C.propagacao.add(coluna.indice);
+                                C.indice.i != linha.indice.i && C.indice.j != linha.indice.j) {
+                            if(!C.propagacao.contains(linha.indice))
+                                C.propagacao.add(linha.indice);
                             break;
                         }
                     }
@@ -343,51 +312,54 @@ public class Automato {
             }
         }  
                 
-        
+        // escreve a tabela final de minimização no arquivo - TABELA
         try{
-            FileWriter arq = new FileWriter("resultado.txt");
+            FileWriter arq = new FileWriter(arquivo1 + ".txt");
             arq.write("INDICE\t\tD[i,j] =\t\tS[i,j] = \t\tMOTIVO\n");
             
-            for(Coluna coluna :matriz){
-                //arq.write(coluna.getIndice().toString() + "\t\t" + coluna.getIgual() + "\t\t\t{ " + " }\t\t\t" + coluna.getMotivo() + "\n");
-                arq.write(coluna.getIndice().toString() + "\t\t" + coluna.getIgual() + "\t");
+            for(Linha linha : matriz){
+                String D_ij = linha.getIgual() ? "0" : "1";
+                arq.write(linha.getIndice().toString() + "\t\t" + D_ij + "\t");
                 
-                for(int i=0; i < (4 - coluna.propagacao.size()); i++){
+                for(int i=0; i < (4 - linha.propagacao.size()); i++){
                     arq.write("    ");
                 }
                 
                 arq.write("{ ");
                 
-                for (Indice Idx : coluna.propagacao) {
+                for (Indice Idx : linha.propagacao) {
                     arq.write(Idx.toString() + " ");
                 }
                 
-                arq.write("}\t\t\t" + coluna.getMotivo() + "\n");
+                arq.write("}\t\t\t" + linha.getMotivo() + "\n");
             }
             arq.close();
         }
         catch(Exception e){
-            
+            System.out.println("Erro ao escrver no Arquivo : " + arquivo1 +
+                    ".txt" + " Motivo : " + e);
         }
-        //Não to dando conta
+        
+        //Função para juntar os estados iguais para escrever o automato minimizado
         String e1 = "";
-        for(Coluna colunaux : matriz){
-            if(colunaux.getIgual()){
+        int id;
+        for(Linha linhaux : matriz){
+            if(linhaux.getIgual()){
                 for (Estado estado : estados){
-                    if(estado.getEstado().contains("q" + colunaux.indice.i)){
-                        if(!estado.getEstado().contains("q" + colunaux.indice.j)){
+                    if(estado.getEstado().contains("q" + linhaux.indice.i)){
+                        if(!estado.getEstado().contains("q" + linhaux.indice.j)){
                             if(estado.getIsInicial()){
-                                estados.get(colunaux.indice.j).setInicial();
-                                estados.get(colunaux.indice.i).setInicial();
+                                estados.get(linhaux.indice.j).setInicial();
+                                estados.get(linhaux.indice.i).setInicial();
                             }
-                            estado.setEstado(estado.getEstado() + "q" + colunaux.indice.j);
-                            e1 = "q" + colunaux.indice.j;
+                            estado.setEstado(estado.getEstado() + "q" + linhaux.indice.j);
+                            e1 = "q" + linhaux.indice.j;
                         }
                     }
                        
                 }
                 
-                int id = -1;
+                id = -1;
                 for(int i=0; i < estados.size(); i++){
                     if(estados.get(i).getEstado().equals(e1))
                         id = i;
@@ -397,10 +369,10 @@ public class Automato {
                 }
                 
                 for(Transicao t : transicoes){
-                    if(t.getOrigem().contains("q" + colunaux.indice.i)){
-                        if(!t.getOrigem().contains("q" + colunaux.indice.j)){
-                            t.setOrigem(t.getOrigem() + "q" + colunaux.indice.j);
-                            e1 = "q" + colunaux.indice.j;
+                    if(t.getOrigem().contains("q" + linhaux.indice.i)){
+                        if(!t.getOrigem().contains("q" + linhaux.indice.j)){
+                            t.setOrigem(t.getOrigem() + "q" + linhaux.indice.j);
+                            e1 = "q" + linhaux.indice.j;
                         }
                     }
                 }
@@ -415,10 +387,10 @@ public class Automato {
                 }
 
                 for(Transicao t : transicoes){
-                    if(t.getDestino().contains("q" + colunaux.indice.i)){
-                        if(!t.getDestino().contains("q" + colunaux.indice.j)){
-                            t.setDestino(t.getDestino() + "q" + colunaux.indice.j);
-                            e1 = "q" + colunaux.indice.j;
+                    if(t.getDestino().contains("q" + linhaux.indice.i)){
+                        if(!t.getDestino().contains("q" + linhaux.indice.j)){
+                            t.setDestino(t.getDestino() + "q" + linhaux.indice.j);
+                            e1 = "q" + linhaux.indice.j;
                         }
                     }
                 }
@@ -433,10 +405,10 @@ public class Automato {
                 }
                 
                 for(Transicao t : transicoes){
-                    if(t.getOrigem().contains("q" + colunaux.indice.j)){
-                        if(!t.getOrigem().contains("q" + colunaux.indice.i)){
-                            t.setOrigem("q" + colunaux.indice.i + t.getOrigem());
-                            e1 = "q" + colunaux.indice.i;
+                    if(t.getOrigem().contains("q" + linhaux.indice.j)){
+                        if(!t.getOrigem().contains("q" + linhaux.indice.i)){
+                            t.setOrigem("q" + linhaux.indice.i + t.getOrigem());
+                            e1 = "q" + linhaux.indice.i;
                         }
                     }
                 }
@@ -451,10 +423,10 @@ public class Automato {
                 }
                 
                 for(Transicao t : transicoes){
-                    if(t.getDestino().contains("q" + colunaux.indice.j)){
-                        if(!t.getDestino().contains("q" + colunaux.indice.i)){
-                            t.setDestino("q" + colunaux.indice.i + t.getDestino());
-                            e1 = "q" + colunaux.indice.i;
+                    if(t.getDestino().contains("q" + linhaux.indice.j)){
+                        if(!t.getDestino().contains("q" + linhaux.indice.i)){
+                            t.setDestino("q" + linhaux.indice.i + t.getDestino());
+                            e1 = "q" + linhaux.indice.i;
                         }
                     }
                 }
@@ -470,9 +442,9 @@ public class Automato {
             }
         }
             
-        
+        // escreve o autômato minimizado resultante no arquivo - AFD NOVO
         try{
-            FileWriter arq = new FileWriter("afd minimizado.txt");
+            FileWriter arq = new FileWriter(arquivo2 + ".txt");
             arq.write("(\n    {");
             
             for(Estado e : estados){
@@ -506,18 +478,55 @@ public class Automato {
             arq.close();
         }
         catch(Exception e){
-            
+            System.out.println("Erro ao escrver no Arquivo : " + arquivo1 +
+                    ".txt" + " Motivo : " + e);
         }
         
     }
     
-    public void propagar(Coluna coluna){
-        ArrayList<Indice> propagacao = coluna.getPropagacao();
+    /**
+     * Método recursivo responsável por tratar a propagação de distinção na tabela.
+     * 
+     * @param linha - uma linha da tabela de minimização
+     */
+    public void propagar(Linha linha){
+        ArrayList<Indice> propagacao = linha.getPropagacao();
         for (Indice propagar : propagacao) {
-            Coluna x = matriz.get(propagar.linhaTabela);
+            Linha x = matriz.get(propagar.linhaTabela);
             x.setNotIgual();
-            x.setMotivo("propagacao" + coluna.indice.toString());
+            x.setMotivo("prop" + linha.indice.toString());
             propagar(x);
         }
     }
+    
+    // Debugger
+    /*
+    public void imprimePraMim(){
+        System.out.print("Estados -> " );
+        for(Estado aux : estados){
+           System.out.println(aux.getEstado());
+        }
+        
+        System.out.print("Afabeto -> " );
+        for(String aux : alfabeto){
+           System.out.println(aux);
+        }
+        
+        System.out.print("Transições -> " );
+        for(Transicao aux : transicoes){
+           System.out.println(aux.getOrigem() + "," + aux.getTerminal() + "->" + aux.getDestino());
+        }
+        
+        System.out.print("Estados Iniciais -> " );
+        for(Estado aux : estados){
+            if(aux.getIsInicial())
+        System.out.println(aux.getEstado());
+        }
+        
+        System.out.print("Estados Finais-> " );
+        for(Estado aux : estados){
+            if(aux.getIsFinal())
+            System.out.println(aux.getEstado());
+        }
+    }*/
 }

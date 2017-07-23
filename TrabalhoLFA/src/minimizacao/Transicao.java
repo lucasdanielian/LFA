@@ -1,20 +1,32 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package minimizacao;
 
 /**
- *
- * @author raydson
+ * Classe Transicao.
+ * 
+ * Representa cada transição feita no AFD (delta)
+ * 
+ * @author Raydson
+ * @author Lucas
+ * @author William
+ * 
  */
 class Transicao {
+    /**
+     * Atributos:
+     * * origem - estado de origem
+     * * terminal - símbolo do alfabeto lido
+     * * destino - estado destino após a transição
+     */
     String origem;
     char terminal;
     String destino;
     
-    
+    /**
+     * Construtor Padrão.
+     * 
+     * Apenas inicializa os atributos
+     * Os valores úteis serão postos pelos métodos set
+     */
     public Transicao(){
         origem = "";
         terminal = 'N';
